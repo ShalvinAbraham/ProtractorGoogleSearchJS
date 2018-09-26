@@ -1,0 +1,148 @@
+==== My Experiments with Protractor =====
+
+Quick Setup:
+Install JDK SE
+Install NodeJS x64 (https://nodejs.org/en/download/current/)
+C:\GoogleSearchJS>npm i -g protractor
+C:\GoogleSearchJS>webdriver-manager update
+C:\GoogleSearchJS>npm install protractor-beautiful-reporter --save-dev
+C:\GoogleSearchJS>protractor pageObjectGoogleSearchSpecConf.js
+Results will be saved in C:\GoogleSearchJS\results\index.html
+======================================================
+
+Install JDK SE (if not there)
+Check::
+-> java -version
+
+Installed NodeJS x64 (https://nodejs.org/en/download/current/) which has NPM also in place
+Check ::
+-> npm --version
+-> node --version
+
+Installed protractor npm package
+-> npm i -g protractor
+Will take some time, but install protractor, jasmine, selenium server, chrome/geko.. drivers etc.
+
+Check::
+-> protractor --version
+-> npm -g list
+
+Updated Webdriver manager to update all drivers :
+-> webdriver-manager update (Make sure to update chrome/firefox installed in the machine so that the driver is compatible)
+ NOTE:: IEDriverServer will not be installed with above command. To install it also, add extra argument : --ie 
+
+
+Start Webdriver manager (If using IE or not using directConnect option) :
+-> webdriver-manager start
+	Selenium Server is up and running on port 4444
+
+Run the sample test provided with protractor when we install the package
+-> C:\Users\SAbraham\AppData\Roaming\npm\node_modules\protractor\example>protractor conf.js
+	Should exeute the test cases in Chrome and then give the results
+
+theObject.then(function(theObject){ /*Do whatever you want to do with theObject*/ });
+
+browser.waitForAngularEnabled(false); //If not angular page. Else will wait and timeout.
+
+//Sample test:
+
+describe('Sample Google Page', function() {
+    it('should have title "Shalvin - Google Search" when I search for "Shalvin"', function() {
+        browser.waitForAngularEnabled(false);
+        
+        browser.get('https://www.google.com/');
+
+        element(by.name('q')).sendKeys('Shalvin');
+        element(by.name('btnK')).click();
+
+        var title = browser.getTitle();
+
+        expect(title).toEqual('Shalvin - Google Search');
+    });
+});
+
+https://www.protractortest.org/#/locators
+New Locators: by.model; by,binding; by.buttonText; by.partialButtonText; $('my-css') :: equivalant to element(by.css('my-css')); Also, $$ => element.all
+
+
+Assertions: 
+expect(title).toEqual('Shalvin - Google Search'); toContain(); toBe();
+
+URL: browser.getCurrentUrl();
+
+element.all() will give array of all elements
+
+beforeEach(() => {
+	//Code to run beforeEach it. MUST be contained inside the in-scope describe(); and can be chained so as to have multiple levels of beforeEach
+});
+
+afterEach(() => {
+	//Code to run afterEach it. MUST be contained inside the in-scope describe(); and can be chained so as to have multiple levels of afterEach
+});
+
+Example:
+
+describe("", () => {
+	beforeEach(() => {  });
+
+	it("", () => {  /*Test*/ });
+		
+	describe("", () => {
+		beforeEach(() => {  });
+		
+		it("", () => { /*Test*/ });
+		
+		afterEach(() => {  });
+	});
+		
+	afterEach(() => {  });
+});
+
+Page Object Model
+
+//In homePage.js
+var homePage = () => {
+	this.search = (key) => {
+		element(by.name('q')).sendKeys(key);
+	};
+};
+
+module.exports = new homePage();
+
+//In spec.js
+var homePage = require('./pages/homePage.js');
+
+
+//We can even return a require, which will be a deference of the page resulted in the action
+return require('./pages/resultsPage.js'); //Make sure that the page is also imported in the page on top as require('./pages/resultsPage.js');
+
+
+//Multiple Browser Support
+  multiCapabilities: [
+    { browserName: 'internet explorer' },
+    { browserName: 'chrome' },
+    { browserName: 'firefox' }
+  ],
+
+ NOTE: Make sure to comment directConnect: true, in the conf.js if using IE
+ NOTE: If testing non angular pages, call browser.waitForAngularEnabled(false) or browser.ignoreSynchronization = true; before navigation; and revert when starting with angular pages
+
+ 
+//Beautiful Reporter:
+ 
+ ## https://www.npmjs.com/package/protractor-beautiful-reporter
+ 
+ -> npm install protractor-beautiful-reporter --save-dev
+ 
+var HtmlReporter = require('protractor-beautiful-reporter');
+ 
+exports.config = {
+   // your config here ...
+ 
+   onPrepare: function() {
+      // Add a screenshot reporter and store screenshots to `/tmp/screenshots`:
+      jasmine.getEnv().addReporter(new HtmlReporter({
+         baseDirectory: 'tmp/screenshots'
+      }).getJasmine2Reporter());
+   }
+}
